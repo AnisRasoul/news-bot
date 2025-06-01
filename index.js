@@ -1,25 +1,49 @@
-const { fetchNews, fetchRssNews } = require('./lib/scraper');
+const { fetchLMDWebsite, fetchLMDFacebook, fetchMIWebsite, fetchMIFacebook, fetchINGFacebook } = require('./lib/scraper');
 const { loadOldNews, saveNews, findNewNews } = require('./lib/storage');
 const { notifyTelegram } = require('./lib/telegram');
 const express = require('express');
-
-const RSS_URL = process.env.RSS_URL;
 
 async function checkAndNotify() {
     try {
         console.log(`[${new Date().toISOString()}] Checking for news...`);
         const oldNews = loadOldNews();
-        const newNews = await fetchNews();
-        let allNews = [...newNews];
-
-        // Fetch RSS news if RSS_URL is set
-        if (RSS_URL) {
-            try {
-                const rssNews = await fetchRssNews(RSS_URL);
-                allNews = allNews.concat(rssNews);
-            } catch (err) {
-                console.error(`[${new Date().toISOString()}] Error fetching RSS news:`, err);
-            }
+        
+        // Fetch news from all sources
+        let allNews = [];
+        
+        try {
+            const lmdWebsiteNews = await fetchLMDWebsite();
+            allNews = allNews.concat(lmdWebsiteNews);
+        } catch (err) {
+            console.error(`[${new Date().toISOString()}] Error fetching LMD Website news:`, err);
+        }
+        
+        try {
+            const lmdFacebookNews = await fetchLMDFacebook();
+            allNews = allNews.concat(lmdFacebookNews);
+        } catch (err) {
+            console.error(`[${new Date().toISOString()}] Error fetching LMD Facebook news:`, err);
+        }
+        
+        try {
+            const miWebsiteNews = await fetchMIWebsite();
+            allNews = allNews.concat(miWebsiteNews);
+        } catch (err) {
+            console.error(`[${new Date().toISOString()}] Error fetching MI Website news:`, err);
+        }
+        
+        try {
+            const miFacebookNews = await fetchMIFacebook();
+            allNews = allNews.concat(miFacebookNews);
+        } catch (err) {
+            console.error(`[${new Date().toISOString()}] Error fetching MI Facebook news:`, err);
+        }
+        
+        try {
+            const ingFacebookNews = await fetchINGFacebook();
+            allNews = allNews.concat(ingFacebookNews);
+        } catch (err) {
+            console.error(`[${new Date().toISOString()}] Error fetching ING Facebook news:`, err);
         }
 
         const diff = findNewNews(oldNews, allNews);
