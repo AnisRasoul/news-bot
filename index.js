@@ -55,7 +55,7 @@ async function checkAndNotify() {
         for (const item of diff) {
             try {
                 await notifyTelegram(item);
-                console.log(`[${new Date().toISOString()}] Sent notification: ${item.title}`);
+                console.log(`[${new Date().toISOString()}] attemting to send notification: ${item.title}`);
             } catch (err) {
                 console.error(`[${new Date().toISOString()}] Error sending Telegram notification:`, err);
             }
@@ -71,7 +71,7 @@ async function checkAndNotify() {
 
 // Run every 30 minutes
 checkAndNotify();
-setInterval(checkAndNotify, 30 * 60 * 1000);
+setInterval(checkAndNotify, 2 * 60 * 60 * 1000);
 
 // Minimal Express server to keep the bot alive
 const app = express();
